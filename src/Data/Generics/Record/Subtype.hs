@@ -32,8 +32,10 @@ isSubtype ra rb = isJust $ genSubtype ra rb
 
 -- | Upcast a type according to a subtyping witness.
 upcast :: forall a b. (Data a, Data b) => a :<: b -> a -> b
-upcast (SubWit fs) a = fromJust $ reify a >>=
-                     reflect
+upcast (SubWit fs) = fromJust
+                     . reflect
                      . flip (foldl' updater) fs
                      . M.filterWithKey (\ k a -> isJust . flip lookup fs $ k)
+                     . fromJust -- Safe since :<: implies records
+                     . reifyMay
   where updater m (na, nb)  = M.insert nb (m ! na) $ M.delete na m 
