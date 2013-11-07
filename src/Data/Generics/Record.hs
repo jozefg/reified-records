@@ -1,6 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Data.Generics.Record where
 import Data.Data
+import Data.Maybe
+import Data.List
+import Control.Monad
+import Data.Function
+
 -- | A phantom type used to parameterize functions based on records.
 -- This let's us avoid passing @undefined@s or manually creating instances
 -- all the time.
@@ -18,3 +23,7 @@ isRecord :: forall a. Data a => RecordT a -> Bool
 isRecord r = length cs == 1 && maybe False ((>0) . length) fs
   where cs = dataTypeConstrs . dataTypeOf $ (undefined :: a)
         fs = fields r
+
+-- | Return a record where all fields are _|_
+emptyRecord :: forall a. Data a => RecordT a -> a
+emptyRecord _ = fromConstr . head . dataTypeConstrs . dataTypeOf $ (undefined :: a)
