@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+module Data.Generics.Reify.Record (reify, reflect) where
 import Data.Dynamic
 import Data.Typeable
 import Data.Data
@@ -8,16 +9,17 @@ import Data.Maybe
 import Control.Monad.State
 import Control.Applicative
 
+fields :: Data a => a -> Maybe [String]
+fields a = if length cs == 1 && length fs > 0 then Just fs else Nothing
+  where cs = dataTypeConstrs . dataTypeOf $ a
+        fs = cs >>= constrFields
+
 reify :: Data a => Map String Dynamic -> Maybe a
-reify vault | length (concatMap constrFields constrs) > 0 && length constrs == 1 = result
-            | otherwise = Nothing
+reify vault = result
   where constrs     = dataTypeConstrs . dataTypeOf $ fromJust result
-        fields      = map (flip M.lookup vault) $ constrs >>= constrFields
-        result      = flip evalStateT fields . gmapM popFields . fromConstr . head $ constrs
-        popFields _ = (get >>= lift . head >>= lift . fromDynamic) <* modify tail
+        fs          = fields (fromJust result) >>= mapM (flip M.lookup vault)
+        result      = flip evalStateT fs . gmapM popFields . fromConstr . head $ constrs
+        popFields _ = (get >>= lift . (fromDynamic . head =<<)) <* modify (fmap tail)
 
-
--- | Example
-data Test = Test { foo :: Integer, bar :: String} deriving(Data, Typeable, Show)
-m = M.fromList [("bar", toDyn "bazfoo"), ("foo", toDyn (1 :: Integer))]
-t = reify m :: Maybe Test
+reflect :: Data a => a -> Maybe (Map String Dynamic)
+reflect a = fields a >>= return . M.fromList . flip zip (gmapQ toDyn a)
