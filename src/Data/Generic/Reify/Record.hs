@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE Trustworthy #-}
 module Data.Generics.Reify.Record (reify, reflect) where
 import Data.Dynamic
 import Data.Typeable
