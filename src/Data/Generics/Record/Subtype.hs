@@ -1,6 +1,6 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ScopedTypeVariables, TypeOperators #-}
 module Data.Generics.Record.Subtype (
-  SubtypeWit,
+  (:<:),
   genSubtype,
   isSubtype,
   upcast) where
@@ -15,12 +15,12 @@ import Data.Generics.Record.Reify
 import Data.Generics.Record
 
 -- | A witness for a subtyping relation between two records so that @ a <: b @
-newtype SubtypeWit a b = SubWit {unSubWit :: [(String, String)]}
+newtype a :<: b = SubWit {unSubWit :: [(String, String)]}
 
--- | Returns a witness for a @SubtypeWit@ by traversing
+-- | Returns a witness for a subtyping relation for @a@ and @b@ by traversing
 -- the fields of @a@ and @b@ and pairing each field of @a@ with
 -- the first one of the same type in @b@.
-genSubtype :: forall a b. (Data a, Data b) => RecordT a -> RecordT b -> Maybe (SubtypeWit a b)
+genSubtype :: forall a b. (Data a, Data b) => RecordT a -> RecordT b -> Maybe (a :<: b)
 genSubtype ra rb = (SubWit . fst) `fmap` foldM findMatch ([], recordStructure rb) (recordStructure ra)
   where findMatch (matches, remaining) (t, n) = do
           n' <- lookup t remaining
@@ -31,7 +31,7 @@ isSubtype :: forall a b. (Data a, Data b) => RecordT a -> RecordT b -> Bool
 isSubtype ra rb = isJust $ genSubtype ra rb
 
 -- | Upcast a type according to a subtyping witness.
-upcast :: forall a b. (Data a, Data b) => SubtypeWit a b -> a -> b
+upcast :: forall a b. (Data a, Data b) => a :<: b -> a -> b
 upcast (SubWit fs) a = fromJust $ reify a >>=
                      reflect
                      . flip (foldl' updater) fs
