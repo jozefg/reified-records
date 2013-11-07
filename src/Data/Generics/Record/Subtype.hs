@@ -3,7 +3,7 @@ module Data.Generics.Record.Subtype (
   SubtypeWit,
   genSubtype,
   isSubtype,
-  cast) where
+  upcast) where
 import Data.Data
 import Data.List
 import Data.Function

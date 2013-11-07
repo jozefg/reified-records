@@ -40,5 +40,6 @@ fields _ = fs
 emptyRecord :: forall a. Data a => RecordT a -> a
 emptyRecord _ = fromConstr . head . dataTypeConstrs . dataTypeOf $ (undefined :: a)
 
+-- | Return a records structure of as a list of types paired with field names.
 recordStructure :: forall a. Data a => RecordT a -> [(TypeRep, String)]
 recordStructure a = zip (gmapQ typeOf (emptyRecord a)) $ fields a
