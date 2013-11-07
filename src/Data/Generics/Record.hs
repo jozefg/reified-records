@@ -1,4 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ScopedTypeVariables, Safe #-}
 module Data.Generics.Record (
   RecordT,
   isRecord,
@@ -11,7 +11,8 @@ import Data.Maybe
 
 -- | A phantom type used to parameterize functions based on records.
 -- This let's us avoid passing @undefined@s or manually creating instances
--- all the time. It can only be created for types which are records.
+-- all the time. It can only be created for types which are records and
+-- is used as a token to most of the API's functions.
 data RecordT a = RecordT
 
 -- | Returns @True@ if @a@ is a data type with a single constructor

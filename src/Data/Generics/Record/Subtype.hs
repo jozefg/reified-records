@@ -1,4 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables, TypeOperators #-}
+{-# LANGUAGE ScopedTypeVariables, TypeOperators, Safe #-}
 module Data.Generics.Record.Subtype (
   (:<:),
   genSubtype,
