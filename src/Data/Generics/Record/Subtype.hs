@@ -21,10 +21,10 @@ newtype a :<: b = SubWit {unSubWit :: [(String, String)]}
 -- the fields of @a@ and @b@ and pairing each field of @a@ with
 -- the first one of the same type in @b@.
 genSubtype :: forall a b. (Data a, Data b) => RecordT a -> RecordT b -> Maybe (a :<: b)
-genSubtype ra rb = (SubWit . fst) `fmap` foldM findMatch ([], recordStructure rb) (recordStructure ra)
+genSubtype ra rb = (SubWit . fst) `fmap` foldM findMatch ([], recordStructure ra) (recordStructure rb)
   where findMatch (matches, remaining) (t, n) = do
           n' <- lookup t remaining
-          return ((n, n') : matches, deleteBy ((==) `on` fst) (t, "") remaining)
+          return ((n', n) : matches, deleteBy ((==) `on` fst) (t, "") remaining)
 
 -- | Returns true if @ a <: b @ according to the algorithm for @genSubtype@
 isSubtype :: forall a b. (Data a, Data b) => RecordT a -> RecordT b -> Bool
