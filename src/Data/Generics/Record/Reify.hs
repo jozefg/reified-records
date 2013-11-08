@@ -12,13 +12,13 @@ import Control.Applicative
 
 -- | Reify a record to a @Map@
 reify :: forall a. Data a => RecordT a -> a -> Map String Dynamic
-reify _ = fromJust . reifyMay
+reify r a = M.fromList . flip zip (gmapQ toDyn a) $ fields r
 
 -- | If @a@ is a record, this will return a @Map@ where the keys
 -- are the field names and the values are wrapped in @toDyn@. Otherwise
 -- @Nothing@ will be returned.
 reifyMay :: forall a. Data a => a -> Maybe (Map String Dynamic)
-reifyMay a = (recordT :: Maybe (RecordT a))>>= return . M.fromList . flip zip (gmapQ toDyn a) . fields
+reifyMay a = fmap (flip reify a) $ (recordT :: Maybe (RecordT a))
 
 -- | Reflect a @Map@ of strings to an arbitrary type. If the type is a record, each of
 -- its field names will be looked up in the record. If any of the types don't match
